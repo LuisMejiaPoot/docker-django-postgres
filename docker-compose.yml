@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: "tiendaOnline"
+    environment:
+      POSTGRES_USER: testing
+      POSTGRES_PASSWORD: tests
+      POSTGRES_DB: test
+      POSTGRES_HOST_AUTH_METHOD": trust
+      
+    volumes:
+      - pgvol:/var/lib/postgresql/data
+    networks: 
+      backend:
+        aliases: 
+          - databases
+    ports:
+      - '5432'
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    restart: always
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    links:
+      - db
+    networks: 
+      backend:
+        aliases: 
+          - web
+    
+
+
+    # networks: 
+    #   - databases
+  
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5001:80
+    depends_on:
+      - db
+    links:
+      - db:db
+    environment:
+
+      PGADMIN_DEFAULT_EMAIL: admin
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    networks: 
+      backend:
+        aliases: 
+          - manejador
+      
+
+
+volumes:
+  pgvol:
+  pgadmin:
+
+networks:
+  backend:
+    driver: bridge
+  
+      #https://docs.docker.com/compose/django/
